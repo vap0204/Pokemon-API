@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container-fluid p-3">
+        <div class="row gx-5 gy-5" id="pokemons">
+
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="pokemonModal" aria-hidden="true" aria-labelledby="pokemonModal" tabindex="-1">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="pokemonName">Modal title</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <img src="" id="pokemonImage" alt="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="$('#pokemonModal').modal('hide');" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        const URL = 'https://pokeapi.co/api/v2/pokemon/';
+        function loadPokemons(requestURL) {
+            $.ajax({
+                url: requestURL,
+                type: 'GET',
+                success: function(response) {
+                    console.log(response);
+                    let pokemons = response.results;
+                    let html = '';
+                    $(pokemons).each(function(index, value) {
+                        html += '<div class="col-3">';
+                        html += `<span class="display-6">${value.name}</span>`;
+                        html += `<div><button data-url="${value.url}" class="btn btn-primary btn-sm showPokemon">Preview</button></div>`;
+                        html += '</div>';
+                    });
+
+                    html += '<div class="col-6">';
+                    if(response.previous != null) {
+                        html += `<button data-url="${response.previous}" class="btn btn-primary col-3 page">PREVIOUS</button>&nbsp;`;
+                    }
+                    
+                    if(response.next != null) {
+                        html += `&nbsp;<button data-url="${response.next}" class="btn btn-primary col-3 page">NEXT</button>`;
+                    }
+                    
+                    html += '</div>';
+                    $('#pokemons').html(html);
+                }
+            })
+        }
+
+        $(function(){
+            loadPokemons(URL);
+
+            $('body').on('click', '.page', function(){
+                let url = $(this).data('url');
+                loadPokemons(url);
+            });
+
+            $('body').on('click','.showPokemon', function(){
+                let url = $(this).data('url');
+                console.log(url);
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#pokemonName').html(response.name);
+                        $('#pokemonImage').attr('src', response.sprites.front_default);
+                        $('#pokemonModal').modal('show');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
